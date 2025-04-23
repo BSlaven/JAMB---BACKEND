@@ -9,10 +9,9 @@ const io = new Server(server);
 io.on('connection', (socket) => {
   console.log('a user connected:', socket.id);
 
-  // Listen for messages from client
   socket.on('chat message', (msg) => {
     console.log('message:', msg);
-    io.emit('chat message', msg); // Broadcast to all clients
+    io.emit('chat message', msg);
   });
 
   socket.on('disconnect', () => {
