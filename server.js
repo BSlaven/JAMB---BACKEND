@@ -22,7 +22,7 @@ io.on('connection', (socket) => {
 
   socket.on('opponentData', (data) => {
     console.log('Opponent Data:', data);
-    io.emit('Opponent Data', data);
+    socket.broadcast.emit('opponentData', data);
   });
 
   socket.on('disconnect', () => {
