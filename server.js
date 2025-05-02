@@ -25,6 +25,11 @@ io.on('connection', (socket) => {
     socket.broadcast.emit('opponentData', data);
   });
 
+  socket.on('newDiceValues', (dice) => {
+    console.log('newDiceValues:', dice);
+    socket.broadcast.emit('newDiceValues', dice);
+  });
+
   socket.on('disconnect', () => {
     console.log('Majstore, taj server ti je prekinut!', socket.id);
   });
