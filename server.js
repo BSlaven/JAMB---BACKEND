@@ -26,7 +26,7 @@ io.on('connection', (socket) => {
   });
 
   socket.on('newDiceValues', (dice) => {
-    console.log('newDiceValues:', dice);
+    console.log('newDiceValues recieved');
     socket.broadcast.emit('newDiceValues', dice);
   });
 
