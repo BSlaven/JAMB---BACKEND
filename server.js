@@ -20,14 +20,19 @@ const io = new Server(server, {
 io.on('connection', (socket) => {
   console.log('a user connected:', socket.id);
 
+  socket.on('join_room', roomId => {
+    console.log(`User ${socket.id} joined room ${roomId}`);
+    socket.join(roomId);
+  })
+
   socket.on('opponentData', (data) => {
     console.log('Opponent Data:', data);
-    socket.broadcast.emit('opponentData', data);
+    socket.to(data.roomId).emit('opponentData', data.columns);
   });
 
   socket.on('newDiceValues', (dice) => {
     console.log('newDiceValues recieved');
-    socket.broadcast.emit('newDiceValues', dice);
+    socket.to(dice.roomId).emit('newDiceValues', dice.values);
   });
 
   socket.on('disconnect', () => {
