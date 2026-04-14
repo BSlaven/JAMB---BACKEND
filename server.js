@@ -27,12 +27,12 @@ io.on('connection', (socket) => {
 
   socket.on('opponentData', (data) => {
     console.log('Opponent Data:', data);
-    socket.broadcast.emit('opponentData', data);
+    socket.to(data.roomId).emit('opponentData', data.columns);
   });
 
   socket.on('newDiceValues', (dice) => {
     console.log('newDiceValues recieved');
-    socket.broadcast.emit('newDiceValues', dice);
+    socket.to(dice.roomId).emit('newDiceValues', dice.values);
   });
 
   socket.on('disconnect', () => {
