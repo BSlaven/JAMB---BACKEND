@@ -18,6 +18,21 @@ const io = new Server(server, {
 });
 
 io.on('connection', (socket) => {
+
+  socket.on('create_or_join_room', ({ roomId }, callback) => {
+    if(!roomId) {
+      return callback({ success: false, message: 'Neispravan broj sobe. Probajte ponovo' })
+    }
+
+    const room = io.sockets.adapter.rooms.get(roomId);
+
+    if(room && room.size >= 2) {
+      return callback({ success: false, message: 'Ova igra već ima dva igrača. Moguća je samo igra 1 na 1.' });
+    }
+
+    callback({ success: true, message: `Igra broj ${roomId} je dostupna.` });
+  })
+  
   socket.on('join_room', roomId => {
     socket.join(roomId);
   })
