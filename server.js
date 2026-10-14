@@ -18,31 +18,54 @@ const io = new Server(server, {
 });
 
 io.on('connection', (socket) => {
+  console.log('a user connected:', socket.id);
 
-  socket.on('create_or_join_room', ({ roomId }, callback) => {
-    if(!roomId) {
-      return callback({ success: false, message: 'Neispravan broj sobe. Probajte ponovo' })
+  socket.on('create_room', ({ roomId }, callback) => {
+    if (!roomId) {
+      return callback({ success: false, message: 'Broj igre nije ispravan.' });
     }
 
     const room = io.sockets.adapter.rooms.get(roomId);
 
-    if(room && room.size >= 2) {
-      return callback({ success: false, message: 'Ova igra već ima dva igrača. Moguća je samo igra 1 na 1.' });
+    if (room && room.size > 0) {
+      return callback({ success: false, message: 'Soba sa tim brojem već postoji.' });
     }
-
-    callback({ success: true, message: `Igra broj ${roomId} je dostupna.` });
-  })
-  
-  socket.on('join_room', roomId => {
+    
     socket.join(roomId);
-  })
 
-  socket.on('opponentData', (data) => {
-    socket.to(data.roomId).emit('opponentData', data.columns);
+    callback({ success: true, roomId });
   });
 
-  socket.on('newDiceValues', (dice) => {
-    socket.to(dice.roomId).emit('newDiceValues', dice.values);
+  socket.on('join_room', ({ roomId }, callback) => {
+    const room = io.sockets.adapter.rooms.get(roomId);
+
+    if (!room) {
+      callback({ success: false, message: `Soba ${roomId} ne postoji. Pokušajte ponovo.` });
+      return;
+    }
+
+    if (room.size >= 2) {
+      callback({ success: false, message: `Soba ${roomId} već ima dva igrača. Igra moguća samo 1 na 1.` });
+      return;
+    }
+
+    socket.join(roomId);
+    callback({ success: true, roomId });
+
+    console.log(`Player ${socket.id} joined room: ${roomId}`);
+
+    socket.to(roomId).emit('player_joined', { userId: socket.id });
+    io.to(roomId).emit('game_ready', { roomId: roomId });
+  });
+
+  socket.on('opponentData', ({ columns, roomId }) => {
+    console.log('Opponent Data:', columns, 'end of opponent data');
+    socket.to(roomId).emit('opponentData', columns);
+  });
+
+  socket.on('newDiceValues', ({ diceWithoutIcons, rollNumber, roomId }) => {
+    console.log('newDiceValues recieved', diceWithoutIcons);
+    socket.to(roomId).emit('newDiceValues', { diceWithoutIcons, rollNumber });
   });
 
   socket.on('disconnect', () => {
