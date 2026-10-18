@@ -55,7 +55,7 @@ io.on('connection', (socket) => {
     console.log(`Player ${socket.id} joined room: ${roomId}`);
 
     socket.to(roomId).emit('player_joined', { userId: socket.id });
-    io.to(roomId).emit('game_ready', { roomId: roomId });
+    io.to(roomId).emit('game_ready', { roomId });
   });
 
   socket.on('opponentData', ({ columns, roomId }) => {
