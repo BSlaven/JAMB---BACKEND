@@ -17,6 +17,8 @@ const io = new Server(server, {
   }
 });
 
+const roomsData = {};
+
 io.on('connection', (socket) => {
   console.log('a user connected:', socket.id);
 
@@ -32,6 +34,10 @@ io.on('connection', (socket) => {
     }
     
     socket.join(roomId);
+
+    roomsData[roomId] = {
+      columns: columns || [],
+    };
 
     callback({ success: true, roomId });
   });
@@ -50,12 +56,15 @@ io.on('connection', (socket) => {
     }
 
     socket.join(roomId);
-    callback({ success: true, roomId });
 
-    console.log(`Player ${socket.id} joined room: ${roomId}`);
+    const roomInfo = roomsData[roomId];
+    const columns = roomInfo ? roomInfo.columns : [];
 
-    socket.to(roomId).emit('player_joined', { userId: socket.id });
-    io.to(roomId).emit('game_ready', { roomId });
+    callback({ 
+      success: true, 
+      roomId, 
+      columns 
+    });
   });
 
   socket.on('opponentData', ({ columns, roomId }) => {
