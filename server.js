@@ -22,7 +22,7 @@ const roomsData = {};
 io.on('connection', (socket) => {
   console.log('a user connected:', socket.id);
 
-  socket.on('create_room', ({ roomId }, callback) => {
+  socket.on('create_room', ({ roomId, gameColumns }, callback) => {
     if (!roomId) {
       return callback({ success: false, message: 'Broj igre nije ispravan.' });
     }
@@ -32,14 +32,20 @@ io.on('connection', (socket) => {
     if (room && room.size > 0) {
       return callback({ success: false, message: 'Soba sa tim brojem već postoji.' });
     }
+
+    // console.log('gameColumns:', gameColumns);
+    
+    roomsData[roomId] = {
+      columns: gameColumns || [],
+    };
     
     socket.join(roomId);
 
-    roomsData[roomId] = {
-      columns: columns || [],
-    };
+    const roomInfo = roomsData[roomId];
+    const columns = roomInfo ? roomInfo.columns : [];
 
-    callback({ success: true, roomId });
+    
+    callback({ success: true, roomId, columns });
   });
 
   socket.on('join_room', ({ roomId }, callback) => {
@@ -68,12 +74,12 @@ io.on('connection', (socket) => {
   });
 
   socket.on('opponentData', ({ columns, roomId }) => {
-    console.log('Opponent Data:', columns, 'end of opponent data');
+    // console.log('Opponent Data:', columns, 'end of opponent data');
     socket.to(roomId).emit('opponentData', columns);
   });
 
   socket.on('newDiceValues', ({ diceWithoutIcons, rollNumber, roomId }) => {
-    console.log('newDiceValues recieved', diceWithoutIcons);
+    // console.log('newDiceValues recieved', diceWithoutIcons);
     socket.to(roomId).emit('newDiceValues', { diceWithoutIcons, rollNumber });
   });
 
