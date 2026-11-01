@@ -71,6 +71,8 @@ io.on('connection', (socket) => {
       roomId, 
       columns 
     });
+
+    io.to(roomId).emit('game_ready', { message: 'Igra je spremna! Sada možete početi igrati.', roomId });
   });
 
   socket.on('opponentData', ({ columns, roomId }) => {
